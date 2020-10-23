@@ -16,7 +16,6 @@ def get_iface_and_ip():
 	return iface_and_ip
 
 
-
 def sniff(iface,filter):
 	if filter == 'http':
 		scapy.sniff(iface=iface, prn=packet_http, store=False)
@@ -40,6 +39,7 @@ def callback(pkt):
 	elif pkt.haslayer('ARP'):
 		print('ARP:   '+'OPERATION:'+str(pkt['ARP'].op)+' '+'SRC-MAC:'+str(pkt['ARP'].hwsrc)+' '+'SRC-IP:'+str(pkt['ARP'].psrc)+' '+'DST-MAC:'+str(pkt['ARP'].hwdst)+' '+'DST-IP:'+str(pkt['ARP'].pdst)+'\r\n')
 
+		
 def packet_http(pkt):
 	if pkt.haslayer(http.HTTPRequest):
 		h = bytes(pkt[http.HTTPRequest])
