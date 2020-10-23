@@ -16,6 +16,7 @@ def get_iface_and_ip():
 	return iface_and_ip
 
 
+
 def sniff(iface,filter):
 	if filter == 'http':
 		scapy.sniff(iface=iface, prn=packet_http, store=False)
@@ -37,9 +38,11 @@ def callback(pkt):
 		else:
 			print('UDP IN:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+'\r\n')
 	elif pkt.haslayer('ARP'):
-		print('ARP:   '+'OPERATION:'+str(pkt['ARP'].op)+' '+'SRC-MAC:'+str(pkt['ARP'].hwsrc)+' '+'SRC-IP:'+str(pkt['ARP'].psrc)+' '+'DST-MAC:'+str(pkt['ARP'].hwdst)+' '+'DST-IP:'+str(pkt['ARP'].pdst)+'\r\n')
+		if str(pkt['ARP'].op)=='1':
+			print('ARP REQUEST:'+' '+'SRC-MAC:'+str(pkt['ARP'].hwsrc)+' '+'SRC-IP:'+str(pkt['ARP'].psrc)+' '+'DST-MAC:'+str(pkt['ARP'].hwdst)+' '+'DST-IP:'+str(pkt['ARP'].pdst)+'\r\n')
+		else:
+			print('ARP RESPONSE:'+' '+'SRC-MAC:'+str(pkt['ARP'].hwsrc)+' '+'SRC-IP:'+str(pkt['ARP'].psrc)+' '+'DST-MAC:'+str(pkt['ARP'].hwdst)+' '+'DST-IP:'+str(pkt['ARP'].pdst)+'\r\n')
 
-		
 def packet_http(pkt):
 	if pkt.haslayer(http.HTTPRequest):
 		h = bytes(pkt[http.HTTPRequest])
