@@ -3,28 +3,52 @@ import subprocess
 import re
 from scapy.layers import http
 
-def choose_iface():
-	avaliable_ifaces = re.findall(r'\d+\:\ \w+\:',str(subprocess.run(['ip', 'link'], stdout = subprocess.PIPE)))
+
+def get_iface_and_ip():
+	iface_and_ip = {}
+	avaliable_ifaces = re.findall(r'\w+: ',str(subprocess.run(['ifconfig'], stdout = subprocess.PIPE)))
 	for i in range(len(avaliable_ifaces)):
-		avaliable_ifaces[i] = avaliable_ifaces[i].replace(":", "")
-	return avaliable_ifaces
+		if avaliable_ifaces[i][0]=='n':
+			avaliable_ifaces[i] = avaliable_ifaces[i][1:]
+	avaliable_ip = re.findall(r'inet\s\d+.\d+.\d+.\d+',str(subprocess.run(['ifconfig'], stdout = subprocess.PIPE)))
+	for i in range(len(avaliable_ifaces)):
+		iface_and_ip.update({avaliable_ifaces[i].replace(': ',''):avaliable_ip[i].replace('inet ', '')})
+	return iface_and_ip
+
 
 
 def sniff(iface,filter):
 	if filter == 'http':
 		scapy.sniff(iface=iface, prn=packet_http, store=False)
 	else:
-		scapy.sniff(iface=iface, filter=filter, prn=lambda x:x.show, store=False)
+		scapy.sniff(iface=iface, filter=filter, prn=callback, store=False)
 
 
-def packet_http(packet):
-	if filter == 'http':
-		if packet.haslayer(http.HTTPRequest):
-			print(packet.show)
+def callback(pkt):
+	global host_ip
+	if pkt.haslayer('TCP'):
+		if host_ip == pkt['IP'].src:
+			print('TCP OUT:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+'\r\n')
+		else:
+			print('TCP IN:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+'\r\n')
+
+	elif pkt.haslayer('UDP'):
+		if host_ip == pkt['IP'].src:
+			print('UDP OUT:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+'\r\n')
+		else:
+			print('UDP IN:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+'\r\n')
+	elif pkt.haslayer('ARP'):
+		print('ARP:   '+'OPERATION:'+str(pkt['ARP'].op)+' '+'SRC-MAC:'+str(pkt['ARP'].hwsrc)+' '+'SRC-IP:'+str(pkt['ARP'].psrc)+' '+'DST-MAC:'+str(pkt['ARP'].hwdst)+' '+'DST-IP:'+str(pkt['ARP'].pdst)+'\r\n')
+
+def packet_http(pkt):
+	if pkt.haslayer(http.HTTPRequest):
+		h = bytes(pkt[http.HTTPRequest])
+		return h.decode(encoding='utf-8')
 
 
-print('Choose one of avaliable network interfaces:',*choose_iface(), sep='\n')
+print('Choose one of avaliable network interfaces:',*get_iface_and_ip(), sep='\n')
 iface = str(input())
-print('Choose filter (http, arp, tcp, udp avaliable):')
+host_ip = get_iface_and_ip()[iface]
+print('Choose filter (http, arp, tcp, udp for e.g):')
 filter=str(input())
 sniff(iface,filter)
