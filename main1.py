@@ -32,7 +32,6 @@ def callback(pkt):
 			print('TCP OUT:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+' '+'FLAGS:'+str(pkt['TCP'].flags)+'\r\n')
 		else:
 			print('TCP IN:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+' '+'FLAGS:'+str(pkt['TCP'].flags)+'\r\n')
-
 	elif pkt.haslayer('UDP'):
 		if host_ip == pkt['IP'].src:
 			print('UDP OUT:'+' '+'SRC-MAC:'+str(pkt.src)+' '+'SRC-IP:'+str(pkt['IP'].src)+' '+'SRC-PORT:'+str(pkt.sport)+' '+'\n'+'DST-MAC:'+str(pkt.dst)+' '+'DST-IP:'+str(pkt['IP'].dst)+' '+'DST-PORT:'+str(pkt.dport)+'\r\n')
@@ -48,10 +47,8 @@ def callback(pkt):
 def callback_dns1(pkt):
 	 if pkt.haslayer('DNSRR'):
 		 print('DNS-RESPONSE:'+pkt['DNSRR'].rrname.decode(encoding='utf-8')+' RESPONSE:'+str(pkt['DNSRR'].rdata))
-	 elif pkt.haslayer(scapy.DNSQR):
+	 elif pkt.haslayer('DNSQR'):
 		 print('DNS-REQUEST:'+pkt['DNSQR'].qname.decode(encoding='utf-8'))
-
-
 
 
 def callback_http1(pkt):
