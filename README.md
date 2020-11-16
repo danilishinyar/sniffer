@@ -6,8 +6,21 @@
 * Выбор фильтра для анализа трафика
 * Вывод информации, содержащейся в пакетах, в читабельном виде
 * Вывод таблицы с IP и MAC адресами устройств в сети
-* Удается отключить пользователя (пытался реализовать arp-spoofing, но не удается перенаправить пакеты через себя)
-  Вот что в настройках роутера, если в качестве жертвы устройство с IP 192.168.31.147:
-  ![](gif/router_screen.jpg)
+* ARP-спуфинг
+  * Для его корректной работы необходимо выполнить следующие комманды:
+    * sudo -i
+
+    * echo 1 > /proc/sys/net/ipv4/ip_forward
+
+    * iptables --flush
+
+    * iptables -t nat --flush
+
+    * iptables --zero
+
+    * iptables -A FORWARD --in-interface wlp2s0  -j ACCEPT
+
+    * iptables -t nat --append POSTROUTING --out-interface YOUR INTERFACE MASQUERADE
+
 ## Пример работы
 ![](gif/howitworks-1.gif)

