@@ -8,7 +8,7 @@
 * Вывод таблицы с IP и MAC адресами устройств в сети
 * ARP-спуфинг
   * Для его корректной работы необходимо выполнить следующие комманды:
-     `sudo -i` 
+     * `sudo -i` 
      `echo 1 > /proc/sys/net/ipv4/ip_forward`
      `iptables --flush`
      `iptables -t nat --flush`
