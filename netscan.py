@@ -2,7 +2,6 @@ import scapy.all as scapy
 import subprocess
 import re
 import time
-import threading
 import os
 
 def choose_iface_ip():
