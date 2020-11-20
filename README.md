@@ -10,6 +10,8 @@
   sudo -i
   echo 1 > /proc/sys/net/ipv4/ip_forward
   ```
+* Обнаружение спуфинга
+* Сохранение пакетов 
 
 ## Пример работы
 ![](gif/howitworks-1.gif)

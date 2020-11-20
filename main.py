@@ -4,6 +4,7 @@ import re
 from scapy.layers import http
 
 
+
 def get_iface_and_ip():
 	iface_and_ip = {}
 	avaliable_ifaces = re.findall(r'\w+: ',str(subprocess.run(['ifconfig'], stdout = subprocess.PIPE)))
@@ -16,13 +17,17 @@ def get_iface_and_ip():
 	return iface_and_ip
 
 
-def sniff(iface,filter):
-	if filter == 'http':
-		scapy.sniff(iface=iface, prn=callback_http1, store=False)
-	elif filter == 'dns':
-		scapy.sniff(iface=iface, prn=callback_dns1, store=False)
-	else:
-		scapy.sniff(iface=iface, filter=filter, prn=callback, store=False)
+def sniff(iface, filter, store, path):
+		if filter == 'http':
+			pkts = scapy.sniff(iface=iface, prn=callback_http1, store=store)
+		elif filter == 'dns':
+			pkts = scapy.sniff(iface=iface, prn=callback_dns1, store=store)
+		elif filter == 'detect':
+			pkts = scapy.sniff(prn=detect, store=store)
+		else:
+			pkts = scapy.sniff(iface=iface, filter=filter, prn=callback, store=store)
+		if store:
+			scapy.wrpcap(path, pkts)
 
 
 def callback(pkt):
@@ -44,6 +49,7 @@ def callback(pkt):
 			print('ARP-RESPONSE:'+' '+'SRC-MAC:'+str(pkt['ARP'].hwsrc)+' SRC-IP:'+str(pkt['ARP'].psrc)+' DST-MAC:'+str(pkt['ARP'].hwdst)+' DST-IP:'+str(pkt['ARP'].pdst)+'\r\n')
 
 
+
 def callback_dns1(pkt):
 	 if pkt.haslayer('DNSRR'):
 		 print('DNS-RESPONSE:'+pkt['DNSRR'].rrname.decode(encoding='utf-8')+' RESPONSE:'+str(pkt['DNSRR'].rdata))
@@ -51,15 +57,22 @@ def callback_dns1(pkt):
 		 print('DNS-REQUEST:'+pkt['DNSQR'].qname.decode(encoding='utf-8'))
 
 
+
 def callback_http1(pkt):
 	if pkt.haslayer(http.HTTPRequest):
 		h = bytes(pkt[http.HTTPRequest])
 		return h.decode(encoding='utf-8')
 
-
 print('Choose one of avaliable network interfaces:',*get_iface_and_ip(), sep='\n')
 iface = str(input())
 host_ip = get_iface_and_ip()[iface]
-print('Choose filter (http, arp, tcp, udp, dns for e.g):')
-filter=str(input())
-sniff(iface,filter)
+answer = str(input('Do you want to save packets?[y/n]'))
+if answer == 'y':
+	store = True
+	path = str(input('Enter path to the .pcap file:'))
+else:
+	store = False
+	path=''
+
+filter=str(input('Choose filter (http, arp, tcp, udp, dns for e.g):'))
+sniff(iface,filter,store,path)

