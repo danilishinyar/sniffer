@@ -1,5 +1,5 @@
 import scapy.all as scapy
-
+import time
 
 def get_mac(ip):
     pkt_arp = scapy.ARP(pdst=ip)
@@ -15,6 +15,8 @@ def detect(pkt):
             real_mac = get_mac(pkt['ARP'].psrc)
             resp_mac = pkt['ARP'].hwsrc
             if real_mac != resp_mac:
-                print(f'ATTACK, REAL-MAC: {real_mac}, FAKE-MAC: {resp_mac}' )
+                print(f'ATTACK, REAL-MAC: {real_mac}, FAKE-MAC: {resp_mac}\n' )
+                time.sleep(5)
     except IndexError:
-            print('YOU ARE NOT UNDER ATTACK')
+            print('YOU ARE NOT UNDER ATTACK\n')
+            time.sleep(20)

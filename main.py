@@ -2,7 +2,8 @@ import scapy.all as scapy
 import subprocess
 import re
 from scapy.layers import http
-
+from detect import detect
+import threading
 
 
 def get_iface_and_ip():
@@ -75,4 +76,14 @@ else:
 	path=''
 
 filter=str(input('Choose filter (http, arp, tcp, udp, dns for e.g):'))
-sniff(iface,filter,store,path)
+detection = 'detect'
+
+sniffer = threading.Thread(target=sniff, args=(iface,filter,store,path))
+arp_detection = threading.Thread(target=sniff, args=(iface,detection,store,path))
+arp_detection.setDaemon(True)
+
+arp_detection.start()
+sniffer.start()
+
+arp_detection.join()
+sniffer.join()
