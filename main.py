@@ -20,9 +20,9 @@ def get_iface_and_ip():
 
 def sniff(iface, filter, store, path):
 		if filter == 'http':
-			pkts = scapy.sniff(iface=iface, prn=callback_http1, store=store)
+			pkts = scapy.sniff(iface=iface, prn=callback_http, store=store)
 		elif filter == 'dns':
-			pkts = scapy.sniff(iface=iface, prn=callback_dns1, store=store)
+			pkts = scapy.sniff(iface=iface, prn=callback_dns, store=store)
 		elif filter == 'detect':
 			pkts = scapy.sniff(prn=detect, store=store)
 		else:
@@ -51,7 +51,7 @@ def callback(pkt):
 
 
 
-def callback_dns1(pkt):
+def callback_dns(pkt):
 	 if pkt.haslayer('DNSRR'):
 		 print('DNS-RESPONSE:'+pkt['DNSRR'].rrname.decode(encoding='utf-8')+' RESPONSE:'+str(pkt['DNSRR'].rdata))
 	 elif pkt.haslayer('DNSQR'):
@@ -59,10 +59,10 @@ def callback_dns1(pkt):
 
 
 
-def callback_http1(pkt):
+def callback_http(pkt):
 	if pkt.haslayer(http.HTTPRequest):
-		h = bytes(pkt[http.HTTPRequest])
-		return h.decode(encoding='utf-8')
+ 		return str(bytes(pkt[http.HTTPRequest]).decode())
+
 
 print('Choose one of avaliable network interfaces:',*get_iface_and_ip(), sep='\n')
 iface = str(input())

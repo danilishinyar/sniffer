@@ -19,4 +19,4 @@ def detect(pkt):
                 time.sleep(5)
     except IndexError:
             print('YOU ARE NOT UNDER ATTACK\n')
-            time.sleep(20)
+            time.sleep(50)
